@@ -193,7 +193,6 @@ def plot_all_graphs(fig, axs, id):
         if tdf==None:   
             return None, None
     
-    text = str(tdf['text'].values)
 
     messages=[f'Обработано записей: {len(tdf)}', f"Среднее кол-во строк в предложении ~ {len_sent(tdf)}"]
 
