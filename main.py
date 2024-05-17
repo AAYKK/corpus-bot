@@ -8,6 +8,7 @@ TOKEN='6742100930:AAFWmK2R_8StqyA3QmHZpsQFwG4kwbwDam8'
 bot = telebot.TeleBot(TOKEN)
 
 instruction_file=open('source/instruction.pdf', 'rb')
+
 @bot.message_handler(commands=['start'])
 def start(message):
     bot.send_message(message.chat.id, f'Привет, {message.from_user.first_name}!')
