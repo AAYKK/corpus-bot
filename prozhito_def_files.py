@@ -15,7 +15,7 @@ nltk.download('punkt')
 nltk.download('stopwords')
 stop_words = set(stopwords.words('russian'))
 
-dp=pd.read_csv('source/persons_daries.csv', sep=',' , low_memory=False)
+dp=pd.read_csv('corpus-bot/source/persons_daries.csv', sep=',' , low_memory=False)
 sns.color_palette("tab10")
 sns.set(style="whitegrid")
 
