@@ -75,7 +75,7 @@ def step_1(message):
                 # Закрытие изображения
                 plt.clf()
                 plt.close('all')
-                
+                change_mode(message)
             except Exception as e:
                     print(e)
                     bot.send_message(message.chat.id, 'Непредвиденная ошибка')
