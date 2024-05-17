@@ -3,6 +3,7 @@ from telebot import *
 from prozhito_def_files import plot_all_graphs
 import io
 import matplotlib.pyplot as plt
+import traceback
 
 TOKEN='6742100930:AAFWmK2R_8StqyA3QmHZpsQFwG4kwbwDam8'
 bot = telebot.TeleBot(TOKEN)
@@ -76,8 +77,18 @@ def step_1(message):
                 plt.clf()
                 plt.close('all')
                 change_mode(message)
+except Exception as e:
+    
+
+
+
             except Exception as e:
-                    print(e)
+                    def exit(exitCode):
+                        print(exitCode)
+                        print(traceback.format_exc())
+                    tb = traceback.format_exc()
+                    print(tb)
+                    exit("Failed to convert name" + str(e))
                     bot.send_message(message.chat.id, 'Непредвиденная ошибка')
                     search(message)
         
