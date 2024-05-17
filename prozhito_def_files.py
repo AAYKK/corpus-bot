@@ -188,7 +188,7 @@ def plot_pos(tdf, ax):
 def plot_all_graphs(fig, axs, id):
     ### apply:
     tdf = extract_by_id(id,dp)
-    
+    print(tdf)
     if isinstance(tdf, pd.DataFrame)==False:
         if tdf==None:   
             return None, None
