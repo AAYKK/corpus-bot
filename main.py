@@ -77,10 +77,6 @@ def step_1(message):
                 plt.clf()
                 plt.close('all')
                 change_mode(message)
-except Exception as e:
-    
-
-
 
             except Exception as e:
                     def exit(exitCode):
