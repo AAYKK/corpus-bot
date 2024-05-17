@@ -1,31 +1,39 @@
+
+
 import re
 import pandas as pd
+from bs4 import BeautifulSoup
 import nltk
+nltk.download('punkt')
 from nltk import punkt
 from nltk import *
+nltk.download('stopwords')
 from pymystem3 import Mystem
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
+stop_words = set(stopwords.words('russian'))
 import pymorphy2
 import seaborn as sns
 import matplotlib.pyplot as plt
 from sklearn.feature_extraction.text import CountVectorizer
+import os
 
-nltk.download('punkt')
-nltk.download('stopwords')
-stop_words = set(stopwords.words('russian'))
 
-dp=pd.read_csv('source/persons_daries.csv', sep=',' , low_memory=False)
-sns.color_palette("tab10")
-sns.set(style="whitegrid")
+dp = pd.read_csv('source/persons_daries.csv',sep=',')
 
-# extract all writer's texts by id:
+
+### тут нужен ввод от пользователя:
+id ="7374" #int(input())
+
+### extract all writer's texts by id:
 def extract_by_id(id,data):
+    if id.isdigit()==False:
+        print("айди должен содержать только цифры")
+        return [None]
     try:
         extract = data.loc[data['prozhito_id']==int(id)]['text']
         if len(extract)==0:
-            return None
-        
+            print('нет такого айди')
         return pd.DataFrame(extract.apply(lambda x:re.sub(r'<[^>]+>', '', x)))
     except:
         print('ошибка')
@@ -40,7 +48,7 @@ def len_sent(tdf):
     return round(word_per_sent) 
 # print(f'-------СРЕДНЕЕ КОЛИЧЕСТВО СЛОВ В ПРЕДЛОЖЕНИИ РАВНО ~ {round(word_per_sent)}--------') 
 
-def plot_dirty(tdf, ax):
+def plot_dirty(tdf):
     count_vect_total = CountVectorizer(ngram_range=(1,1), min_df=5)
 
     corpus_total = [x for x in tdf['text'].fillna(' ') if len(str(x)) > 0]
@@ -49,18 +57,16 @@ def plot_dirty(tdf, ax):
     total_counts = pd.DataFrame(corpus_total_fit.toarray(), columns=count_vect_total.get_feature_names_out()).sum()
     ngram_total_df = pd.DataFrame(total_counts, columns=['counts'])
 
-    
+    sns.set(style="whitegrid")
+    f, ax = plt.subplots(figsize=(5, 5))
     ngram_total_df = ngram_total_df.sort_values(by='counts', ascending=False)
-    
     plot_dirty = sns.barplot(x="counts",
                              y=ngram_total_df.head(20).index,
-                             ax=ax,
                              data=ngram_total_df.head(20),
-                             hue=ngram_total_df.head(20).index,
-                             legend=False).set_title('TОП СЛОВ БЕЗ ЧИСТКИ')
-    return plot_dirty
+                             palette=["indianred"]).set_title('---TОП СЛОВ БЕЗ ЧИСТКИ---')
+    return plt.savefig('_plot.png')
 
-def plot_clean(tdf, ax):
+def plot_clean(tdf):
     text = str(tdf['text'].values)#.astype('str')
     tokens = word_tokenize(text)
     stop_words = set(stopwords.words('russian'))
@@ -76,35 +82,16 @@ def plot_clean(tdf, ax):
     ngram_total_df = pd.DataFrame(total_counts,columns=['counts'])
 
     ngram_total_df = ngram_total_df.sort_values(by=['counts'],ascending=False)
-    
+    sns.set_theme(style="whitegrid")
+    f, ax = plt.subplots(figsize=(5, 5))
+    gram_total_df = ngram_total_df.sort_values(by='counts',ascending=False)
     plot_clean = sns.barplot(x="counts",
-                            y=ngram_total_df.head(20).index,
-                            data=ngram_total_df.head(20),
-                            
-                            hue=ngram_total_df.head(20).index,
-                            legend=False, ax=ax).set_title('TОП СЛОВ ПОСЛЕ ЧИСТКИ')
-                    
-    return plot_clean
+            y=ngram_total_df.head(20).index,
+            data=ngram_total_df.head(20),
+            palette=["indianred"]).set_title('---Топ слов после чистки---')
+    return plt.savefig('clea_plot.png')
 
-def lemmatize(wrds, m):
-    res = []
-    for wrd in wrds:
-        p = m.parse(wrd)[0]
-        res.append(p.normal_form)
-        
-    return res
-
-def tokenize(text, stoplst):
-    without_stop_words = []
-    txxxt = nltk.word_tokenize(text)
-    for word in txxxt:
-        if len(word) == 1:
-            continue
-        if word.lower() not in stoplst:
-            without_stop_words.append(word)
-    return without_stop_words
-
-def process_and_visualize(stop_words, tdf, ax):
+def process_and_visualize(stop_words, tdf):
     text = str(tdf['text'].values)
     
     def pre_process(text):
@@ -118,7 +105,24 @@ def process_and_visualize(stop_words, tdf, ax):
         text = text[:text.find(sub_str)]
         return text
 
+    def tokenize(text, stoplst):
+        without_stop_words = []
+        txxxt = nltk.word_tokenize(text)
+        for word in txxxt:
+            if len(word) == 1:
+                continue
+            if word.lower() not in stoplst:
+                without_stop_words.append(word)
+        return without_stop_words
+
     morph = pymorphy2.MorphAnalyzer()
+
+    def lemmatize(wrds, m):
+        res = []
+        for wrd in wrds:
+            p = m.parse(wrd)[0]
+            res.append(p.normal_form)
+        return res
 
     cleaned_text = pre_process(text)
     tokenized_text = tokenize(cleaned_text, stop_words)
@@ -131,14 +135,14 @@ def process_and_visualize(stop_words, tdf, ax):
     not_most_common = Fdist.most_common()[-21:-1]
     #plt.title("---Топ редких слов:---")
     not_most_common = pd.DataFrame(not_most_common)
-    not_most_common.plot(x=0, y=1, ax=ax, rot=0, kind='barh')
+    not_most_common.plot(x=0, y=1, figsize=(5, 5), rot=0, kind='barh')
     
 
-    return not_most_common
+    return plt.savefig('rare_plot.png')
 
 
 # top pos:
-def plot_pos(tdf, ax):
+def plot_pos(tdf):
     m = Mystem(disambiguation=False)
     pos_counter_bk = Counter()
     text = str(tdf['text'].values)#text = ' '.join(str(sent) for sent in tdf[0].values)
@@ -163,47 +167,16 @@ def plot_pos(tdf, ax):
         pos_tags.append(pos)
         counts.append(count)
 
-    bk_plt = ax.bar(pos_tags, counts)
+    bk_plt = plt.bar(pos_tags, counts)
     plt.xticks(rotation=30)
-    
-    return bk_plt
-  
-#def plot_top_names(ax):
-    def names_extr(wrds):
-        morph = pymorphy2.MorphAnalyzer()
-        res = []
-        for wrd in wrds:
-            p = morph.parse(wrd)[0]
-            if 'Name' in p.tag:
-                res.append(wrd)
-        return res
+    plt.savefig('rare_plot.png')
+### apply:
+tdf = extract_by_id(id,dp)
+text = str(tdf['text'].values)
+print('Обработано записей: ', len(tdf))
 
-    is_name = names_extr(m.lemmatize(tokenize(text,stop_words)))
-    Fdist = FreqDist(is_name)
-    plt.title("Топ имен на линейном графике:")
-    plot_top_names=Fdist.plot(20, cumulative = False, ax=ax)
-    return plot_top_names
-
-
-def plot_all_graphs(fig, axs, id):
-    ### apply:
-    tdf = extract_by_id(id,dp)
-    
-    if isinstance(tdf, pd.DataFrame)==False:
-        if tdf==None:   
-            return None, None
-    
-    text = str(tdf['text'].values)
-
-    messages=[f'Обработано записей: {len(tdf)}', f"Среднее кол-во строк в предложении ~ {len_sent(tdf)}"]
-
-    plot_clean(tdf, axs[0, 0])
-    # Вызовите остальные функции и передайте им соответствующий объект ax
-    plot_dirty(tdf, axs[0, 1])
-    plot_pos(tdf, axs[1, 0])
-    process_and_visualize(stop_words, tdf, axs[1, 1])
-    #plot_top_names(axs[2, 0])
-    fig.tight_layout()
-    
-    return fig, messages
-
+len_sent(tdf)
+plot_dirty(tdf)
+process_and_visualize(stop_words, tdf)
+plot_clean(tdf) 
+plot_pos(tdf)

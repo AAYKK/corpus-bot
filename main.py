@@ -1,6 +1,6 @@
 import telebot
 from telebot import *
-from prozhito_def_files import plot_all_graphs, plot_clean, plot_dirty, plot_pos, process_and_visualize
+from prozhito_def_files import plot_all_graphs
 import io
 import matplotlib.pyplot as plt
 
