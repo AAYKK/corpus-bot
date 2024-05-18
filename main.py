@@ -3,11 +3,15 @@ from telebot import *
 from prozhito_def_files import plot_all_graphs
 import io
 import matplotlib.pyplot as plt
+import traceback
 
 TOKEN='6742100930:AAFWmK2R_8StqyA3QmHZpsQFwG4kwbwDam8'
 bot = telebot.TeleBot(TOKEN)
 
-instruction_file=open('source/instruction.pdf', 'rb')
+
+def exit(exitCode):
+    print(exitCode)
+    print(traceback.format_exc())
 
 @bot.message_handler(commands=['start'])
 def start(message):
@@ -30,8 +34,17 @@ def mode_router(message):
         search(message)
         
     elif message.text == '🛈 Инструкция':
-        bot.send_document(message.chat.id, instruction_file)    
-        change_mode(message)
+        try:        
+            with open('source/instruction.pdf', 'rb') as file:
+                bot.send_document(message.chat.id, file)    
+            change_mode(message)
+            
+        except Exception as e:
+            tb = traceback.format_exc()
+            print(tb)
+            exit("Failed to convert name" + str(e))
+            bot.send_message(message.chat.id, 'Файл пока недоступен')
+            change_mode(message)
         
     else:
         bot.send_message(message.chat.id, 'Неверный ввод. Выберите один из вариантов(кнопок).')
@@ -75,9 +88,12 @@ def step_1(message):
                 # Закрытие изображения
                 plt.clf()
                 plt.close('all')
-                
-            except Exception as e:
-                    print(e)
+                change_mode(message)
+
+            except Exception as e:                  
+                    tb = traceback.format_exc()
+                    print(tb)
+                    exit("Failed to convert name" + str(e))
                     bot.send_message(message.chat.id, 'Непредвиденная ошибка')
                     search(message)
         
