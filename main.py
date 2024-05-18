@@ -8,7 +8,21 @@ import traceback
 TOKEN='6742100930:AAFWmK2R_8StqyA3QmHZpsQFwG4kwbwDam8'
 bot = telebot.TeleBot(TOKEN)
 
-instruction_file=open('source/instruction.pdf', 'rb')
+
+def exit(exitCode):
+    print(exitCode)
+    print(traceback.format_exc())
+
+def get_file():
+    try:
+        with open('source/instruction.pdf', 'rb') as file:
+            return file
+            
+    except Exception as e:
+        tb = traceback.format_exc()
+        print(tb)
+        exit("Failed to convert name" + str(e))
+
 
 @bot.message_handler(commands=['start'])
 def start(message):
@@ -31,8 +45,16 @@ def mode_router(message):
         search(message)
         
     elif message.text == '🛈 Инструкция':
-        bot.send_document(message.chat.id, instruction_file)    
-        change_mode(message)
+        try:
+            bot.send_document(message.chat.id, get_file())    
+            change_mode(message)
+            
+        except Exception as e:
+            tb = traceback.format_exc()
+            print(tb)
+            exit("Failed to convert name" + str(e))
+            bot.send_message(message.chat.id, 'Файл пока недоступен')
+            change_mode(message)
         
     else:
         bot.send_message(message.chat.id, 'Неверный ввод. Выберите один из вариантов(кнопок).')
@@ -78,10 +100,7 @@ def step_1(message):
                 plt.close('all')
                 change_mode(message)
 
-            except Exception as e:
-                    def exit(exitCode):
-                        print(exitCode)
-                        print(traceback.format_exc())
+            except Exception as e:                  
                     tb = traceback.format_exc()
                     print(tb)
                     exit("Failed to convert name" + str(e))
