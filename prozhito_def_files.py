@@ -131,7 +131,7 @@ def process_and_visualize(stop_words, tdf, ax):
     not_most_common = Fdist.most_common()[-21:-1]
     #plt.title("---Топ редких слов:---")
     not_most_common = pd.DataFrame(not_most_common)
-    not_most_common.plot(x=0, y=1, ax=ax, rot=0, kind='barh')
+    not_most_common.plot(x=0, y=1, ax=ax, rot=0, kind='barh').set_title('TОП РЕДКИХ СЛОВ')
     
 
     return not_most_common
@@ -163,7 +163,7 @@ def plot_pos(tdf, ax):
         pos_tags.append(pos)
         counts.append(count)
 
-    bk_plt = ax.bar(pos_tags, counts)
+    bk_plt = ax.bar(pos_tags, counts).set_title('TОП ЧАСТЕЙ РЕЧИ')
     plt.xticks(rotation=30)
     
     return bk_plt
@@ -193,7 +193,7 @@ def plot_all_graphs(fig, axs, id):
             return None, None
     
 
-    messages=[f'Обработано записей: {len(tdf)}', f"Среднее кол-во строк в предложении ~ {len_sent(tdf)}"]
+    messages=[f'Обработано записей: {len(tdf)}', f"Среднее кол-во слов в предложении ~ {len_sent(tdf)}"]
 
     plot_clean(tdf, axs[0, 0])
     # Вызовите остальные функции и передайте им соответствующий объект ax
