@@ -13,17 +13,6 @@ def exit(exitCode):
     print(exitCode)
     print(traceback.format_exc())
 
-def get_file():
-    try:
-        with open('source/instruction.pdf', 'rb') as file:
-            return file
-            
-    except Exception as e:
-        tb = traceback.format_exc()
-        print(tb)
-        exit("Failed to convert name" + str(e))
-
-
 @bot.message_handler(commands=['start'])
 def start(message):
     bot.send_message(message.chat.id, f'Привет, {message.from_user.first_name}!')
@@ -45,8 +34,9 @@ def mode_router(message):
         search(message)
         
     elif message.text == '🛈 Инструкция':
-        try:
-            bot.send_document(message.chat.id, get_file())    
+        try:        
+            with open('source/instruction.pdf', 'rb') as file:
+                bot.send_document(message.chat.id, file)    
             change_mode(message)
             
         except Exception as e:
