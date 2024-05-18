@@ -7,8 +7,13 @@ import matplotlib.pyplot as plt
 TOKEN='6742100930:AAFWmK2R_8StqyA3QmHZpsQFwG4kwbwDam8'
 bot = telebot.TeleBot(TOKEN)
 
-instruction_file=open('source/instruction.pdf', 'rb')
-
+def get_file():
+    try:
+        with open('source/instruction.pdf', 'rb') as file:
+            return file
+    except Exception as e:
+        print(e)
+        
 @bot.message_handler(commands=['start'])
 def start(message):
     bot.send_message(message.chat.id, f'Привет, {message.from_user.first_name}!')
@@ -30,7 +35,7 @@ def mode_router(message):
         search(message)
         
     elif message.text == '🛈 Инструкция':
-        bot.send_document(message.chat.id, instruction_file)    
+        bot.send_document(message.chat.id, get_file())    
         change_mode(message)
         
     else:
