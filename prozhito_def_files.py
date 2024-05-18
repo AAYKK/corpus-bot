@@ -57,7 +57,9 @@ def plot_dirty(tdf, ax):
                              ax=ax,
                              data=ngram_total_df.head(20),
                              hue=ngram_total_df.head(20).index,
-                             legend=False).set_title('TОП СЛОВ БЕЗ ЧИСТКИ')
+                             legend=False)
+    
+    ax.set_title('TОП СЛОВ БЕЗ ЧИСТКИ')
     return plot_dirty
 
 def plot_clean(tdf, ax):
@@ -82,7 +84,8 @@ def plot_clean(tdf, ax):
                             data=ngram_total_df.head(20),
                             
                             hue=ngram_total_df.head(20).index,
-                            legend=False, ax=ax).set_title('TОП СЛОВ ПОСЛЕ ЧИСТКИ')
+                            legend=False, ax=ax)
+    ax.set_title('TОП СЛОВ ПОСЛЕ ЧИСТКИ')
                     
     return plot_clean
 
@@ -131,7 +134,7 @@ def process_and_visualize(stop_words, tdf, ax):
     not_most_common = Fdist.most_common()[-21:-1]
     #plt.title("---Топ редких слов:---")
     not_most_common = pd.DataFrame(not_most_common)
-    not_most_common.plot(x=0, y=1, ax=ax, rot=0, kind='barh').set_title('TОП РЕДКИХ СЛОВ')
+    not_most_common.plot(x=0, y=1, ax=ax, rot=0, kind='barh', legend=False).set_title('TОП РЕДКИХ СЛОВ')
     
 
     return not_most_common
@@ -163,7 +166,8 @@ def plot_pos(tdf, ax):
         pos_tags.append(pos)
         counts.append(count)
 
-    bk_plt = ax.bar(pos_tags, counts).set_title('TОП ЧАСТЕЙ РЕЧИ')
+    bk_plt = ax.bar(pos_tags, counts, )
+    ax.set_title('TОП ЧАСТЕЙ РЕЧИ')
     plt.xticks(rotation=30)
     
     return bk_plt
@@ -201,7 +205,12 @@ def plot_all_graphs(fig, axs, id):
     plot_pos(tdf, axs[1, 0])
     process_and_visualize(stop_words, tdf, axs[1, 1])
     #plot_top_names(axs[2, 0])
-    fig.tight_layout()
+    #fig.tight_layout()
     
     return fig, messages
 
+if __name__ == '__main__':
+    id='2525'
+    fig, axs = plt.subplots(nrows=2, ncols=2, figsize=(18.5, 14), layout="constrained")
+    fig, messages = plot_all_graphs(fig, axs, id)
+    plt.savefig('prozhito.png')

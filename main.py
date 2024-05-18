@@ -8,7 +8,6 @@ import traceback
 TOKEN='6742100930:AAFWmK2R_8StqyA3QmHZpsQFwG4kwbwDam8'
 bot = telebot.TeleBot(TOKEN)
 
-
 def exit(exitCode):
     print(exitCode)
     print(traceback.format_exc())
@@ -65,7 +64,7 @@ def step_1(message):
             try:
                 bot.send_message(message.chat.id, 'Ищу')
                 
-                fig, axs = plt.subplots(nrows=2, ncols=2, figsize=(16, 14))
+                fig, axs = plt.subplots(nrows=2, ncols=2, figsize=(18.5, 14), layout="constrained")
                 
                 fig, messages = plot_all_graphs(fig , axs, message.text)
                 
