@@ -19,7 +19,6 @@ dp=pd.read_csv('source/persons_daries.csv', sep=',' , low_memory=False)
 sns.color_palette("tab10")
 sns.set(style="whitegrid")
 
-# extract all writer's texts by id:
 def extract_by_id(id,data):
     try:
         extract = data.loc[data['prozhito_id']==int(id)]['text']
@@ -27,6 +26,7 @@ def extract_by_id(id,data):
             return None
         
         return pd.DataFrame(extract.apply(lambda x:re.sub(r'<[^>]+>', '', x)))
+    
     except:
         print('ошибка')
         return None
@@ -65,7 +65,6 @@ def plot_dirty(tdf, ax):
 def plot_clean(tdf, ax):
     text = str(tdf['text'].values)#.astype('str')
     tokens = word_tokenize(text)
-    stop_words = set(stopwords.words('russian'))
     filtered_tokens = [word for word in tokens if word not in stop_words]
 
     count_vect_total = CountVectorizer(ngram_range=(1,2),min_df=5)
@@ -107,6 +106,7 @@ def tokenize(text, stoplst):
             without_stop_words.append(word)
     return without_stop_words
 
+
 def process_and_visualize(stop_words, tdf, ax):
     text = str(tdf['text'].values)
     
@@ -120,6 +120,7 @@ def process_and_visualize(stop_words, tdf, ax):
         sub_str = 'sfgff'
         text = text[:text.find(sub_str)]
         return text
+        
 
     morph = pymorphy2.MorphAnalyzer()
 
@@ -172,9 +173,12 @@ def plot_pos(tdf, ax):
     
     return bk_plt
   
-#def plot_top_names(ax):
+
+
+def plot_top_names(tdf, ax):
+    morph = pymorphy2.MorphAnalyzer()
+
     def names_extr(wrds):
-        morph = pymorphy2.MorphAnalyzer()
         res = []
         for wrd in wrds:
             p = morph.parse(wrd)[0]
@@ -182,11 +186,24 @@ def plot_pos(tdf, ax):
                 res.append(wrd)
         return res
 
-    is_name = names_extr(m.lemmatize(tokenize(text,stop_words)))
+    text = str(tdf['text'].values)
+
+    without_stop_words = tokenize(text, stop_words)
+    without_stop_words = lemmatize(without_stop_words, morph)
+    is_name = names_extr(without_stop_words)
     Fdist = FreqDist(is_name)
-    plt.title("Топ имен на линейном графике:")
-    plot_top_names=Fdist.plot(20, cumulative = False, ax=ax)
-    return plot_top_names
+
+    df = pd.DataFrame(list(Fdist.items()), columns=['Name', 'Count']).sort_values(by = 'Count',ascending=False)
+
+    top_names_plot = sns.barplot(x="Count",
+                             y="Name",
+                             data=df,
+                             legend=False, ax=ax)
+    ax.set_title('ТОП ИМЁН')
+
+    return top_names_plot
+
+
 
 
 def plot_all_graphs(fig, axs, id):
@@ -204,13 +221,14 @@ def plot_all_graphs(fig, axs, id):
     plot_dirty(tdf, axs[0, 1])
     plot_pos(tdf, axs[1, 0])
     process_and_visualize(stop_words, tdf, axs[1, 1])
-    #plot_top_names(axs[2, 0])
+    plot_top_names(tdf, axs[2, 0])
     #fig.tight_layout()
     
     return fig, messages
 
+
 if __name__ == '__main__':
     id='2525'
-    fig, axs = plt.subplots(nrows=2, ncols=2, figsize=(18.5, 14), layout="constrained")
+    fig, axs = plt.subplots(nrows=3, ncols=2, figsize=(18.5, 14), layout="constrained")
     fig, messages = plot_all_graphs(fig, axs, id)
     plt.savefig('prozhito.png')
